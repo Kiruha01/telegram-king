@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello_world():
-    return 'Developing2...'
+    return 'Developing3...'
 
 
 @app.route('/update_server', methods=['POST'])
