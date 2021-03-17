@@ -13,7 +13,7 @@ def hello_world():
 @app.route('/update_server', methods=['POST'])
 def webhook():
     if request.method == 'POST':
-        repo = git.Repo('telegram-purhase')
+        repo = git.Repo('telegram-king')
         origin = repo.remotes.origin
         origin.pull()
 
