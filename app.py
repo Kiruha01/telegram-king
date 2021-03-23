@@ -1,13 +1,23 @@
 from flask import Flask, request
 import git
+from logic import database
 
 
 app = Flask(__name__)
 
 
 @app.route('/')
-def hello_world():
-    return 'Developing3...'
+def hello():
+    return database.getall()
+
+@app.route('/add/<name>/')
+def hello_world(name):
+    creator = request.args.get("creator")
+    if creator:
+        database.add(name, creator)
+        return 'ok'
+    else:
+        return 'error'
 
 
 @app.route('/update_server', methods=['POST'])
