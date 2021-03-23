@@ -52,7 +52,7 @@ State = Enum("State", " ".join([
 
 
 class User(Base):
-    __tablename__ = 'Player'
+    __tablename__ = 'User'
 
     id = Column(Integer, primary_key=True)
     telegram_id = Column(Integer, nullable=False)
