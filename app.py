@@ -21,6 +21,13 @@ def state_of_user_is(state: State):
     return function
 
 
+@bot.message_handler(commands=['del_players'])
+def register(message: telebot.types.Message):
+
+    database.del_all_players()
+    bot.send_message(message.from_user.id, text="Done")
+
+
 @bot.message_handler(commands=['start'])
 def register(message: telebot.types.Message):
     keyboard = telebot.types.ReplyKeyboardMarkup(True, True)

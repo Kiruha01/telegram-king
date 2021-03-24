@@ -22,3 +22,11 @@ def push(obj):
 
 def get_players(creator_id):
     return session.query(Player).filter_by(creator=creator_id)
+
+
+# TODO: Удалить после создания всех шагов бота
+def del_all_players():
+    players = session.query(Player).all()
+    for i in players:
+        session.delete(i)
+    session.commit()
