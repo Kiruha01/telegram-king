@@ -5,18 +5,45 @@ import git
 import telebot
 
 from logic import database
+from logic.db_setup import State, User
+
 
 bot = telebot.TeleBot(os.environ.get("TELE_TOKEN"), threaded=False)
 
 
-@bot.message_handler(content_types=['text'])
-def get_text_messages(message):
-    if message.text == "/start":
-        bot.send_message(message.from_user.id, "Ты начал")
-    elif message.text == "Привет":
-        bot.send_message(message.from_user.id, "Тевирп!")
+def state_of_user_is(state: State):
+    def function(message) -> bool:
+        user = database.get_user(message.from_user.id)
+        if user:
+            return user.state == state.value
+        else:
+            return False
+    return function
+
+
+@bot.message_handler(commands=['start'])
+def get_messages(message: telebot.types.Message):
+    user = database.get_user(message.from_user.id)
+    if user:
+        user.state = State.start.value
     else:
-        bot.send_message(message.from_user.id, "Хмм...")
+        user = User(telegram_id=message.from_user.id, state=State.start.value, count_of_players=2, current_asking_player=1)
+    database.session.add(user)
+    database.session.commit()
+    print("ere")
+    bot.send_message(message.from_user.id, text="Starting...")
+
+
+@bot.message_handler(func=state_of_user_is(State.start), content_types=['text'])
+def get_text_messages(message):
+    if message.text == "0":
+        user = database.get_user(message.from_user.id)
+        user.state = State.final.value
+        database.session.add(user)
+        database.session.commit()
+        bot.send_message(message.from_user.id, text="reset to start")
+    else:
+        bot.send_message(message.from_user.id, text="You on the start")
 
 
 if os.environ.get("DEPLOY"):
