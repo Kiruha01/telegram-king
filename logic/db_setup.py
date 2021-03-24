@@ -60,6 +60,8 @@ class User(Base):
     count_of_players = Column(Integer, nullable=False)  # число игроков, играющих в игру
     current_asking_player = Column(Integer, nullable=False)  # Текущий игрок, у которого спрашивают количество взяток
 
+    def set_state(self, state):
+        self.state = state.value
 
 if os.environ.get("DEPOY"):
     engine = create_engine(

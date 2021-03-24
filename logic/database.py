@@ -13,3 +13,8 @@ class get_user(object):
         if (hasattr(cls, 'user') and cls.user.telegram_id != telegram_id) or not hasattr(cls, 'user'):
             cls.user = session.query(User).filter_by(telegram_id=telegram_id).first()
         return cls.user
+
+
+def push_user(user: User):
+    session.add(user)
+    session.commit()
