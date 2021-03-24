@@ -6,7 +6,7 @@ import telebot
 
 from logic import database
 
-bot = telebot.TeleBot(os.environ.get("TELE_TOKEN"))
+bot = telebot.TeleBot(os.environ.get("TELE_TOKEN"), threaded=False)
 
 
 @bot.message_handler(content_types=['text'])
@@ -23,10 +23,10 @@ if os.environ.get("DEPLOY"):
     app = Flask(__name__)
 
 
-    @app.route("/bot", methods=['POST'])
+    @app.route("/bot/", methods=['POST'])
     def getMessage():
         bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
-        return "!", 200
+        return '', 200
 
 
     @app.route("/")
