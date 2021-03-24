@@ -15,6 +15,10 @@ class get_user(object):
         return cls.user
 
 
-def push_user(user: User):
-    session.add(user)
+def push(obj):
+    session.add(obj)
     session.commit()
+
+
+def get_players(creator_id):
+    return session.query(Player).filter_by(creator=creator_id)

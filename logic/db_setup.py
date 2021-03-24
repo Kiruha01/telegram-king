@@ -14,19 +14,22 @@ class Player(Base):
     creator = Column(Integer, nullable=False)
     name = Column(String(127), nullable=False)
 
-    negative_bribes = Column(Integer, nullable=False)
-    negative_hearts = Column(Integer, nullable=False)
-    negative_boys = Column(Integer, nullable=False)
-    negative_girls = Column(Integer, nullable=False)
-    negative_king = Column(Integer, nullable=False)
-    negative_patchwork = Column(Integer, nullable=False)
+    negative_bribes = Column(Integer, nullable=False, default=0)
+    negative_hearts = Column(Integer, nullable=False, default=0)
+    negative_boys = Column(Integer, nullable=False, default=0)
+    negative_girls = Column(Integer, nullable=False, default=0)
+    negative_king = Column(Integer, nullable=False, default=0)
+    negative_patchwork = Column(Integer, nullable=False, default=0)
 
-    positive_bribes = Column(Integer, nullable=False)
-    positive_hearts = Column(Integer, nullable=False)
-    positive_boys = Column(Integer, nullable=False)
-    positive_girls = Column(Integer, nullable=False)
-    positive_king = Column(Integer, nullable=False)
-    positive_patchwork = Column(Integer, nullable=False)
+    positive_bribes = Column(Integer, nullable=False, default=0)
+    positive_hearts = Column(Integer, nullable=False, default=0)
+    positive_boys = Column(Integer, nullable=False, default=0)
+    positive_girls = Column(Integer, nullable=False, default=0)
+    positive_king = Column(Integer, nullable=False, default=0)
+    positive_patchwork = Column(Integer, nullable=False, default=0)
+
+    def __str__(self):
+        return self.name
 
 
 State = Enum("State", " ".join([
