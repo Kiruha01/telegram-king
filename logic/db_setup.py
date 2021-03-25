@@ -67,8 +67,10 @@ class User(Base):
         self.state = state.value
 
 if os.environ.get("DEPLOY"):
-    engine = create_engine(
-        f'mysql+mysqldb://kinggame:{os.environ.get("DBPASS")}@kinggame.mysql.pythonanywhere-services.com/kinggame$game')
+    # TODO: Разобраться с базой данных (Issue #3)
+    engine = create_engine('sqlite:///db.sqlite')
+    # engine = create_engine(
+    #     f'mysql+mysqldb://kinggame:{os.environ.get("DBPASS")}@kinggame.mysql.pythonanywhere-services.com/kinggame$game')
 else:
     engine = create_engine('sqlite:///db.sqlite')
 Base.metadata.create_all(engine)
