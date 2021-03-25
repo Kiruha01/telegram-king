@@ -69,8 +69,8 @@ def get_count_of_users(message: telebot.types.Message):
     if user.current_asking_player == user.count_of_players:
         user.current_asking_player = 0
         user.set_state(State.negative_bribes)
-        # players = database.get_players(message.from_user.id)
-        # bot.send_message(message.from_user.id, f"Сегоднящние игроки - {}")
+        players = database.get_players(message.from_user.id)
+        bot.send_message(message.from_user.id, "Сегоднящние игроки - {0}".format(", ".join([i.name for i in players])))
         markup = telebot.types.InlineKeyboardMarkup()
         markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data=3))
         bot.send_message(message.from_user.id, "РАУНД 1 - Не брать взяток", reply_markup=markup)
