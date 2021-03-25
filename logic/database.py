@@ -20,7 +20,11 @@ def push(obj):
     try:
         session.add(obj)
     except:
-        pass
+        session.rollback()
+    session.commit()
+
+
+def update():
     session.commit()
 
 

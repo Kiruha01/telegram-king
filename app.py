@@ -36,12 +36,13 @@ def register(message: telebot.types.Message):
     user = database.get_user(message.from_user.id)
     if user:
         user.state = State.start.value
+        database.update()
     else:
         user = User(telegram_id=message.from_user.id,
                     state=State.start.value,
                     count_of_players=0,
                     current_asking_player=0)
-    database.push(user)
+        database.push(user)
 
 
 @bot.message_handler(func=state_of_user_is(State.start), content_types=['text'])
@@ -51,7 +52,7 @@ def get_count_of_users(message: telebot.types.Message):
         user.count_of_players = int(message.text)
         user.current_asking_player = 1
         user.set_state(State.names)
-        database.push(user)
+        database.update()
         keyboard = telebot.types.ReplyKeyboardMarkup(selective=False)
         bot.send_message(message.from_user.id, text="Введите имя для первого игрока:", reply_markup=keyboard)
     else:
@@ -82,7 +83,7 @@ def get_count_of_users(message: telebot.types.Message):
         elif user.current_asking_player == 3:
             bot.send_message(message.from_user.id, "Введите имя для четвёртого игрока:")
         user.current_asking_player += 1
-    database.push(user)
+    database.update()
 
 
 if os.environ.get("DEPLOY"):
