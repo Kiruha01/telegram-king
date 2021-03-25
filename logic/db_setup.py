@@ -66,7 +66,7 @@ class User(Base):
     def set_state(self, state):
         self.state = state.value
 
-if os.environ.get("DEPOY"):
+if os.environ.get("DEPLOY"):
     engine = create_engine(
         f'mysql+mysqldb://kinggame:{os.environ.get("DBPASS")}@kinggame.mysql.pythonanywhere-services.com/kinggame$game')
 else:
