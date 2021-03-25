@@ -109,7 +109,7 @@ if os.environ.get("DEPLOY"):
             repo = git.Repo('telegram-king')
             origin = repo.remotes.origin
             origin.pull()
-
+            print("GITHUB: Repo was updated successfully")
             return 'Updated PythonAnywhere successfully', 200
         else:
             return 'Wrong event type', 400
