@@ -15,6 +15,7 @@ def state_of_user_is(state: State):
     def function(message) -> bool:
         user = database.get_user(message.from_user.id)
         if user:
+            print(user.state)
             return user.state == state.value
         else:
             return False
@@ -34,7 +35,7 @@ def register(message: telebot.types.Message):
     keyboard.row('3', '4')
     bot.send_message(message.from_user.id, text="Сколько человек будет играть?", reply_markup=keyboard)
     user = database.get_user(message.from_user.id)
-    if user:
+    if user is not None:
         user.state = State.start.value
         database.update()
     else:
