@@ -15,8 +15,10 @@ class get_user(object):
         return cls.user
 
 
-def push(obj):
+def add(obj):
     session.add(obj)
+
+def commit():
     session.commit()
 
 

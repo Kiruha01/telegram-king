@@ -41,7 +41,8 @@ def register(message: telebot.types.Message):
                     state=State.start.value,
                     count_of_players=0,
                     current_asking_player=0)
-    database.push(user)
+        database.add(user)
+    database.commit()
 
 
 @bot.message_handler(func=state_of_user_is(State.start), content_types=['text'])
@@ -51,7 +52,7 @@ def get_count_of_users(message: telebot.types.Message):
         user.count_of_players = int(message.text)
         user.current_asking_player = 1
         user.set_state(State.names)
-        database.push(user)
+        database.commit()
         keyboard = telebot.types.ReplyKeyboardMarkup(selective=False)
         bot.send_message(message.from_user.id, text="Введите имя для первого игрока:", reply_markup=keyboard)
     else:
@@ -63,14 +64,14 @@ def get_count_of_users(message: telebot.types.Message):
 def get_count_of_users(message: telebot.types.Message):
     player = Player(creator=message.from_user.id,
                     name=message.text)
-    database.push(player)
+    database.add(player)
 
     user = database.get_user(message.from_user.id)
     if user.current_asking_player == user.count_of_players:
         user.current_asking_player = 0
         user.set_state(State.negative_bribes)
-        # players = database.get_players(message.from_user.id)
-        # bot.send_message(message.from_user.id, f"Сегоднящние игроки - {}")
+        players = database.get_players(message.from_user.id)
+        bot.send_message(message.from_user.id, f"Сегоднящние игроки - {', '.join([i.name for i in players])}")
         markup = telebot.types.InlineKeyboardMarkup()
         markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data=3))
         bot.send_message(message.from_user.id, "РАУНД 1 - Не брать взяток", reply_markup=markup)
@@ -82,7 +83,7 @@ def get_count_of_users(message: telebot.types.Message):
         elif user.current_asking_player == 3:
             bot.send_message(message.from_user.id, "Введите имя для четвёртого игрока:")
         user.current_asking_player += 1
-    database.push(user)
+    database.commit()
 
 
 if os.environ.get("DEPLOY"):
