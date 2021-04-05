@@ -38,3 +38,22 @@ def del_all_players():
     for i in players:
         session.delete(i)
     session.commit()
+
+
+def addTestRow(creator, param):
+    players = session.query(Player).filter_by(creator=creator).all()
+    print(len(players))
+    if not players:
+        player = Player(creator=creator, name=str(param))
+        session.add(player)
+    else:
+        player = players[-1]
+        player.name = str(param)
+    session.commit()
+
+def readTestRows():
+    players = session.query(Player).all()
+    string = ''
+    for i in players:
+        string += i.name + ', '
+    return string

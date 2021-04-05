@@ -31,6 +31,10 @@ class Player(Base):
     def __str__(self):
         return self.name
 
+    def __init__(self, creator, name):
+        self.name = name
+        self.creator = creator
+
 
 State = Enum("State", " ".join([
     'start',
@@ -66,7 +70,7 @@ class User(Base):
     def set_state(self, state):
         self.state = state.value
 
-if os.environ.get("DEPLOY"):
+if not os.environ.get("DEPLOY"):
     engine = create_engine(
         f'mysql+mysqldb://kinggame:{os.environ.get("DBPASS")}@kinggame.mysql.pythonanywhere-services.com/kinggame$game')
 else:

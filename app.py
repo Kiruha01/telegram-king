@@ -100,9 +100,19 @@ if os.environ.get("DEPLOY"):
     @app.route("/")
     def webhook():
         bot.remove_webhook()
-        bot.set_webhook(
-            url="https://kinggame.pythonanywhere.com/bot")
-        return "?", 200
+        # bot.set_webhook(
+        #     url="https://kinggame.pythonanywhere.com/bot")
+        return database.readTestRows()
+
+
+    @ app.route("/<int:creator>/")
+    def lololol(creator):
+        name = request.args.get('name')
+        database.addTestRow(creator, name)
+        # bot.remove_webhook()
+        # bot.set_webhook(
+        #     url="https://kinggame.pythonanywhere.com/bot")
+        return "ok"
 
 
     @app.route('/update_server', methods=['POST'])
@@ -117,5 +127,6 @@ if os.environ.get("DEPLOY"):
             return 'Wrong event type', 400
 
 else:
+    print("here")
     bot.remove_webhook()
     bot.polling(none_stop=True)
