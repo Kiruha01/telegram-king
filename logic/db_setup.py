@@ -32,26 +32,25 @@ class Player(Base):
         return self.name
 
 
-State = Enum("State", " ".join([
-    'start',
-    'names',
+class State(Enum):
+    start = 0
+    names = 1
 
-    'negative_bribes',
-    'negative_hearts',
-    'negative_boys',
-    'negative_girls',
-    'negative_king',
-    'negative_patchwork',
+    negative_bribes = 2
+    negative_hearts = 3
+    negative_boys = 4
+    negative_girls = 5
+    negative_king = 6
+    negative_patchwork = 7
 
-    'positive_bribes',
-    'positive_hearts',
-    'positive_boys',
-    'positive_girls',
-    'positive_king',
-    'positive_patchwork',
+    positive_bribes = 8
+    positive_hearts = 9
+    positive_boys = 10
+    positive_girls = 11
+    positive_king = 12
+    positive_patchwork = 13
 
-    'final'
-]))
+    final = 14
 
 
 class User(Base):
