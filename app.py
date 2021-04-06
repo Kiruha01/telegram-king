@@ -108,8 +108,6 @@ def get_count_of_users(message: telebot.types.Message):
         database.add(player)
 
     if user.current_asking_player == user.count_of_players:
-        user.current_asking_player = 0
-        user.set_state(State.negative_bribes)
         players = database.get_players(message.chat.id)
         bot.send_message(message.chat.id, f"Сегоднящние игроки - {', '.join([i.name for i in players])}")
         markup = telebot.types.InlineKeyboardMarkup()
