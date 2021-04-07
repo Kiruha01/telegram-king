@@ -7,7 +7,6 @@ import telebot
 from logic import database
 from logic.db_setup import State, User, Player
 
-
 bot = telebot.TeleBot(os.environ.get("TELE_TOKEN"), threaded=False)
 
 
@@ -18,7 +17,16 @@ def state_of_user_is(state: State):
             return user.state == state.value
         else:
             return False
+
     return function
+
+
+def sum_of_point(user: User):
+    summ = 0
+    for i in State:
+        if 2 <= i.value <= 15:
+            summ += getattr(user, i.name)
+    return summ
 
 
 def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_next_round, is_bribes=False):
@@ -29,15 +37,18 @@ def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_
 
         user.current_asking_player += 1
         bot.send_message(chat_id, f"Сколько {'взяток' if is_bribes else 'карт'} взял "
-                                  f"{players[user.current_asking_player-1].name}?")
+                                  f"{players[user.current_asking_player - 1].name}?")
     elif user.current_asking_player == user.count_of_players:
         setattr(players[user.current_asking_player - 1], state.name, count_of_cards * (database.points_for_3[
             state.name] if user.count_of_players == 3 else database.points_for_4[
             state.name]))
 
-        bot.send_message(chat_id, f"Результаты - {', '.join([i.name + ' ' + str(getattr(i, state.name)) for i in players])}")
+        endl = "\n"
+        bot.send_message(chat_id,
+                         f"Результаты - {endl.join([i.name + ' ' + str(sum_of_point(i)) for i in players])}")
         markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data=state.name))
+
+        markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data=State(state.value+1).name))
         bot.send_message(chat_id, name_of_next_round, reply_markup=markup)
         user.current_asking_player += 1
     database.commit()
@@ -45,15 +56,22 @@ def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_
 
 @bot.message_handler(commands=['del_players'])
 def register(message: telebot.types.Message):
-
     database.del_all_players()
     bot.send_message(message.chat.id, text="Done")
+
+
+@bot.message_handler(commands=['to'])
+def register(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    user.state = State.negative_king.value
+    database.commit()
+    bot.send_message(message.chat.id, text="Сколько?")
 
 
 @bot.message_handler(commands=['start'])
 def register(message: telebot.types.Message):
     keyboard = telebot.types.ReplyKeyboardMarkup(True, True)
-    keyboard.row('3', '4')
+    keyboard.row('3', '1')
     bot.send_message(message.chat.id, text="Сколько человек будет играть?", reply_markup=keyboard)
     user = database.get_user(message.chat.id)
     if user:
@@ -68,24 +86,24 @@ def register(message: telebot.types.Message):
 
 
 # ======================= CALLS ======================
-@bot.callback_query_handler(func=lambda call: call.data == "no_bribes")
+@bot.callback_query_handler(func=lambda call: True)  # call.data == "negative_bribes")
 def start_negative_bribes(call: telebot.types.CallbackQuery):
     bot.edit_message_reply_markup(message_id=call.message.id, reply_markup=None, chat_id=call.message.chat.id)
-    print(call.message.chat.id)
     user = database.get_user(call.message.chat.id)
-    user.state = State.negative_bribes.value
+    user.state = getattr(State, call.data).value
     user.current_asking_player = 1
     player = database.get_players(call.message.chat.id)[0]
-    bot.send_message(call.message.chat.id, f"Сколько взяток взял {player.name}?")
-
-
-
+    if user.state == State.negative_bribes.value or user.state == State.negative_last.value or \
+       user.state == State.positive_bribes.value or user.state == State.positive_last.value:
+        bot.send_message(call.message.chat.id, f"Сколько взяток взял {player.name}?")
+    else:
+        bot.send_message(call.message.chat.id, f"Сколько карт взял {player.name}?")
 
 
 # ====================== START ========================
 @bot.message_handler(func=state_of_user_is(State.start), content_types=['text'])
 def get_count_of_users(message: telebot.types.Message):
-    if message.text == "3" or message.text == "4":
+    if message.text == "3" or message.text == "1":
         user = database.get_user(message.chat.id)
         user.count_of_players = int(message.text)
         user.current_asking_player = 1
@@ -109,10 +127,10 @@ def get_count_of_users(message: telebot.types.Message):
 
     if user.current_asking_player == user.count_of_players:
         players = database.get_players(message.chat.id)
-        bot.send_message(message.chat.id, f"Сегоднящние игроки - {', '.join([i.name for i in players])}")
+        bot.send_message(message.chat.id, f"Сегодняшние игроки - {', '.join([i.name for i in players])}")
         markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data="no_bribes"))
-        bot.send_message(message.chat.id, "РАУНД 1 - Не брать взяток", reply_markup=markup)
+        markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data="negative_bribes"))
+        bot.send_message(message.chat.id, "Раунд 1 - Не брать взяток", reply_markup=markup)
     else:
         if user.current_asking_player == 1:
             bot.send_message(message.chat.id, "Введите имя для второго игрока:")
@@ -124,19 +142,84 @@ def get_count_of_users(message: telebot.types.Message):
     database.commit()
 
 
-# ============================================================================= NEGATIVE BRIBES ========================
 @bot.message_handler(func=state_of_user_is(State.negative_bribes), content_types=["text"])
 def negative_bribes(message: telebot.types.Message):
     user = database.get_user(message.chat.id)
     players = database.get_players(message.chat.id)
     try:
-        set_points_for_round(user, players, message.chat.id, int(message.text), State.negative_bribes, "Раунд 2 - Не брать черви", is_bribes=True)
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.negative_bribes, "Раунд 2 - Не "
+                                                                                                       "брать черви",
+                             is_bribes=True)
     except ValueError:
         bot.send_message(message.chat.id, "Введи число, пожалуйста.")
-# ============================================================================= NEGATIVE BRIBES ========================
 
 
+@bot.message_handler(func=state_of_user_is(State.negative_hearts), content_types=["text"])
+def negative_hearts(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.negative_hearts, "Раунд 3 - Не "
+                                                                                                       "брать мальчиков")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
 
+
+@bot.message_handler(func=state_of_user_is(State.negative_boys), content_types=["text"])
+def negative_hearts(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.negative_boys, "Раунд 4 - Не "
+                                                                                                     "брать девочек")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.negative_girls), content_types=["text"])
+def negative_hearts(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.negative_girls, "Раунд 5 - Не "
+                                                                                                      "брать Кинга")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.negative_king), content_types=["text"])
+def negative_hearts(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.negative_king, "Раунд 6 - Не "
+                                                                                          "брать две последние взятки")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.negative_last), content_types=["text"])
+def negative_hearts(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.negative_last, "Раунд 6 - "
+                                                                                                     "Отрицательный "
+                                                                                                     "ералаш",
+                             is_bribes=True)
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.negative_patchwork), content_types=["text"])
+def negative_hearts(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        bot.send_message(message.chat.id, "TODO")
+        # set_points_for_round(user, players, message.chat.id, int(message.text), State.negative_patchwork, )
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
 
 if os.environ.get("DEPLOY"):
     app = Flask(__name__)

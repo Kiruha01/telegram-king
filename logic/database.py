@@ -14,12 +14,14 @@ points_for_3 = {
     'negative_boys': -4,
     'negative_girls': -4,
     'negative_king': -16,
+    'negative_last': -8,
 
     'positive_bribes': 2,
     'positive_hearts': 2,
     'positive_boys': 4,
     'positive_girls': 4,
-    'positive_king': 16
+    'positive_king': 16,
+    'positive_last' : 8
 }
 
 points_for_4 = {
@@ -28,12 +30,14 @@ points_for_4 = {
     'negative_boys': -10,
     'negative_girls': -10,
     'negative_king': -40,
+    'negative_last': -20,
 
     'positive_bribes': 4,
     'positive_hearts': 4,
     'positive_boys': 10,
     'positive_girls': 10,
-    'positive_king': 40
+    'positive_king': 40,
+    'positive_last': 20
 }
 
 class get_user(object):
