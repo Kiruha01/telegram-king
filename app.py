@@ -58,13 +58,32 @@ def set_points_for_negative_patchwork(user, player: Player, chat_id, text):
     points = text.split()
     if len(points) == db_setup.NUM_OF_ROUNDS:
         dictionary = database.points_for_3 if user.current_asking_player == 3 else database.points_for_4
-        player.negative_bribes = int(points[0]) * dictionary['negative_bribes']
-        player.negative_hearts = int(points[1]) * dictionary['negative_hearts']
-        player.negative_boys = int(points[2]) * dictionary['negative_boys']
-        player.negative_girls = int(points[3]) * dictionary['negative_girls']
-        player.negative_king = int(points[4]) * dictionary['negative_king']
-        player.negative_last = int(points[5]) * dictionary['negative_last']
+        bribes = int(points[0]) * dictionary['negative_bribes']
+        hearts = int(points[1]) * dictionary['negative_hearts']
+        boys = int(points[2]) * dictionary['negative_boys']
+        girls = int(points[3]) * dictionary['negative_girls']
+        king = int(points[4]) * dictionary['negative_king']
+        last = int(points[5]) * dictionary['negative_last']
+        player.negative_patchwork = bribes + hearts + boys + girls + king + last
         user.current_asking_player += 1
+        database.commit()
+    else:
+        bot.send_message(chat_id, "Указаны не все раунды!\nОтправь количество взяток ещё раз.")
+
+
+def set_points_for_positive_patchwork(user, player: Player, chat_id, text):
+    points = text.split()
+    if len(points) == db_setup.NUM_OF_ROUNDS:
+        dictionary = database.points_for_3 if user.current_asking_player == 3 else database.points_for_4
+        bribes = int(points[0]) * dictionary['positive_bribes']
+        hearts = int(points[1]) * dictionary['positive_hearts']
+        boys = int(points[2]) * dictionary['positive_boys']
+        girls = int(points[3]) * dictionary['positive_girls']
+        king = int(points[4]) * dictionary['positive_king']
+        last = int(points[5]) * dictionary['positive_last']
+        player.positive_patchwork = bribes + hearts + boys + girls + king + last
+        user.current_asking_player += 1
+        database.commit()
     else:
         bot.send_message(chat_id, "Указаны не все раунды!\nОтправь количество взяток ещё раз.")
 
@@ -238,7 +257,7 @@ def negative_last(message: telebot.types.Message):
 
 
 @bot.message_handler(func=state_of_user_is(State.negative_patchwork), content_types=["text"])
-def negative_hearts(message: telebot.types.Message):
+def negative_patchwork(message: telebot.types.Message):
     user = database.get_user(message.chat.id)
     players = database.get_players(message.chat.id)
     try:
@@ -252,6 +271,94 @@ def negative_hearts(message: telebot.types.Message):
             markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен',
                                                           callback_data=State.positive_bribes.name))
             bot.send_message(message.chat.id, "Раунд 1 - Брать взятки", reply_markup=markup)
+
+        else:
+            bot.send_message(message.chat.id,
+                             f"Сколько карт взял {players[user.current_asking_player - 1].name} по каждой из категорий?")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи числа, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.positive_bribes), content_types=["text"])
+def positive_bribes(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.positive_bribes, "Раунд 2 - "
+                                                                                                       "Брать черви",
+                             is_bribes=True)
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.positive_hearts), content_types=["text"])
+def positive_hearts(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.positive_hearts, "Раунд 3 - "
+                                                                                                       "Брать мальчиков")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.positive_boys), content_types=["text"])
+def positive_boys(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.positive_boys, "Раунд 4 - "
+                                                                                                     "Брать девочек")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.positive_girls), content_types=["text"])
+def positive_girls(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.positive_girls, "Раунд 5 - "
+                                                                                                      "Брать Кинга")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.positive_king), content_types=["text"])
+def positive_king(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.positive_king, "Раунд 6 - "
+                                                                                                     "Брать две последние взятки")
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.positive_last), content_types=["text"])
+def positive_last(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_round(user, players, message.chat.id, int(message.text), State.positive_last, "Раунд 7 - "
+                                                                                                     "Положительный "
+                                                                                                     "ералаш",
+                             is_bribes=True)
+    except ValueError:
+        bot.send_message(message.chat.id, "Введи число, пожалуйста.")
+
+
+@bot.message_handler(func=state_of_user_is(State.positive_patchwork), content_types=["text"])
+def positive_patchwork(message: telebot.types.Message):
+    user = database.get_user(message.chat.id)
+    players = database.get_players(message.chat.id)
+    try:
+        set_points_for_positive_patchwork(user, players[user.current_asking_player - 1], message.chat.id, message.text)
+        if user.current_asking_player == user.count_of_players + 1:
+            user.current_asking_player += 1
+            database.commit()
+            bot.send_message(message.chat.id, "Игра окончена!")
+            bot.send_message(message.chat.id, "Резы")
 
         else:
             bot.send_message(message.chat.id,
