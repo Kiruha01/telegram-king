@@ -358,7 +358,9 @@ def positive_patchwork(message: telebot.types.Message):
             user.current_asking_player += 1
             database.commit()
             bot.send_message(message.chat.id, "Игра окончена!")
-            bot.send_message(message.chat.id, "Резы")
+            endl = "\n"
+            bot.send_message(message.chat.id,
+                             f"Результаты - {endl.join([i.name + ' ' + str(sum_of_point(i)) for i in players])}")
 
         else:
             bot.send_message(message.chat.id,
