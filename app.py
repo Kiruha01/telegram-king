@@ -110,6 +110,7 @@ def register(message: telebot.types.Message):
     user = database.get_user(message.chat.id)
     if user:
         user.state = State.start.value
+        database.del_players_by_creator(user.telegram_id)
     else:
         user = User(telegram_id=message.chat.id,
                     state=State.start.value,
@@ -361,6 +362,7 @@ def positive_patchwork(message: telebot.types.Message):
             endl = "\n"
             bot.send_message(message.chat.id,
                              f"Результаты - {endl.join([i.name + ' ' + str(sum_of_point(i)) for i in players])}")
+            database.del_players_by_creator(user.telegram_id)
 
         else:
             bot.send_message(message.chat.id,

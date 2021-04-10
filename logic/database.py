@@ -64,3 +64,10 @@ def del_all_players():
     for i in players:
         session.delete(i)
     session.commit()
+
+
+def del_players_by_creator(creator):
+    players = session.query(Player).filter_by(creator=creator)
+    for i in players:
+        session.delete(i)
+    session.commit()
