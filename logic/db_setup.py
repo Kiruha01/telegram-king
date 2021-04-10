@@ -34,6 +34,9 @@ class Player(Base):
         return self.name
 
 
+NUM_OF_ROUNDS = 6
+
+
 class State(Enum):
     start = 0
     names = 1
