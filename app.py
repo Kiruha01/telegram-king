@@ -38,7 +38,7 @@ def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_
 
         user.current_asking_player += 1
         bot.send_message(chat_id, f"Сколько {'взяток' if is_bribes else 'карт'} взял "
-                                  f"{players[user.current_asking_player - 1].name}?")
+                                  f"*{players[user.current_asking_player - 1].name}*?", parse_mode='markdown')
     elif user.current_asking_player == user.count_of_players:
         setattr(players[user.current_asking_player - 1], state.name, count_of_cards * (database.points_for_3[
             state.name] if user.count_of_players == 3 else database.points_for_4[
@@ -132,19 +132,19 @@ def start_negative_bribes(call: telebot.types.CallbackQuery):
     player = database.get_players(call.message.chat.id)[0]
     if user.state == State.negative_bribes.value or user.state == State.negative_last.value or \
             user.state == State.positive_bribes.value or user.state == State.positive_last.value:
-        bot.send_message(call.message.chat.id, f"Сколько взяток взял {player.name}?")
+        bot.send_message(call.message.chat.id, f"Сколько взяток взял *{player.name}*?", parse_mode='markdown')
     elif user.state == State.negative_patchwork.value or user.state == State.positive_patchwork.value:
-        bot.send_message(call.message.chat.id, f"Сколько карт взял {player.name} по каждой из категорий?\n"
+        bot.send_message(call.message.chat.id, f"Сколько карт взял *{player.name}* по каждой из категорий?\n"
                                                f"Отправь по одному числу в каждой строке для следующих раундов"
-                                               f"\n\n"
+                                               f"\n\n```\n"
                                                f"Всего взяток\n"
                                                f"Червовых карт\n"
                                                f"Мальчиков\n"
                                                f"Девочек\n"
                                                f"Кинг\n"
-                                               f"2 последние взятки")
+                                               f"2 последние взятки```", parse_mode='markdown')
     else:
-        bot.send_message(call.message.chat.id, f"Сколько карт взял {player.name}?")
+        bot.send_message(call.message.chat.id, f"Сколько карт взял *{player.name}*?", parse_mode='markdown')
     database.commit()
 
 
@@ -158,13 +158,13 @@ def get_count_of_users(message: telebot.types.Message):
         user.set_state(State.names)
         database.commit()
         keyboard = telebot.types.ReplyKeyboardRemove()
-        bot.send_message(message.chat.id, text="Введите имя для первого игрока:", reply_markup=keyboard)
+        bot.send_message(message.chat.id, text="Введите имя для _первого_ игрока:", reply_markup=keyboard, parse_mode='markdown')
     else:
         bot.send_message(message.chat.id, text="Вы ввели что-то не то")
         register(message)
 
 
-# ======================================================================================= NAMES ========================
+# =================================== NAMES ========================
 @bot.message_handler(func=state_of_user_is(State.names), content_types=['text'])
 def get_count_of_users(message: telebot.types.Message):
     user = database.get_user(message.chat.id)
@@ -175,17 +175,18 @@ def get_count_of_users(message: telebot.types.Message):
 
     if user.current_asking_player == user.count_of_players:
         players = database.get_players(message.chat.id)
-        bot.send_message(message.chat.id, f"Сегодняшние игроки - {', '.join([i.name for i in players])}")
+        bot.send_message(message.chat.id, f"Сегодняшние игроки - _{', '.join([i.name for i in players])}_",
+                         parse_mode='markdown')
         markup = telebot.types.InlineKeyboardMarkup()
         markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data="negative_bribes"))
         bot.send_message(message.chat.id, "Раунд 1 - Не брать взяток", reply_markup=markup)
     else:
         if user.current_asking_player == 1:
-            bot.send_message(message.chat.id, "Введите имя для второго игрока:")
+            bot.send_message(message.chat.id, "Введите имя для _второго_ игрока:", parse_mode='markdown')
         elif user.current_asking_player == 2:
-            bot.send_message(message.chat.id, "Введите имя для третьего игрока:")
+            bot.send_message(message.chat.id, "Введите имя для _третьего_ игрока:", parse_mode='markdown')
         elif user.current_asking_player == 3:
-            bot.send_message(message.chat.id, "Введите имя для четвёртого игрока:")
+            bot.send_message(message.chat.id, "Введите имя для _четвёртого_ игрока:", parse_mode='markdown')
         user.current_asking_player += 1
     database.commit()
 
@@ -277,7 +278,8 @@ def negative_patchwork(message: telebot.types.Message):
 
         else:
             bot.send_message(message.chat.id,
-                             f"Сколько карт взял {players[user.current_asking_player - 1].name} по каждой из категорий?")
+                             f"Сколько карт взял *{players[user.current_asking_player - 1].name}* по каждой из категорий?",
+                             parse_mode='markdown')
     except ValueError:
         bot.send_message(message.chat.id, "Введи числа, пожалуйста.")
 
@@ -361,10 +363,8 @@ def positive_patchwork(message: telebot.types.Message):
             user.current_asking_player += 1
             database.commit()
             bot.send_message(message.chat.id, "Игра окончена!")
-            endl = "\n"
             print(create_total_table(players))
-            bot.send_message(message.chat.id,
-                             create_total_table(players), parse_mode='markdown')
+            bot.send_message(message.chat.id, create_total_table(players), parse_mode='markdown')
             database.del_players_by_creator(user.telegram_id)
 
         else:
