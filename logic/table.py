@@ -51,6 +51,23 @@ def create_total_table(players):
     # """
     return msg
 
+
+def create_round_table(players, round: str):
+    LEN_OF_NAME = 5
+    len_of_columns = [len(i.name[:LEN_OF_NAME]) for i in players]
+
+    msg = "```\n"
+    msg += '| ' + ' | '.join([i.name[:LEN_OF_NAME] for i in players]) + ' | \n'
+    msg += '|-' + '-+-'.join(['-'*i for i in len_of_columns]) + '-|\n'
+
+    for i, l in zip(players, len_of_columns):
+        num = getattr(i, round)
+        first = (l - len(str(num))) // 2
+        msg += '| ' + ' ' * first + str(num) + ' ' * (l - len(str(num)) - first) + ' '
+    msg += '|\n```'
+    return msg
+
+
 if __name__ == "__main__":
     from db_setup import User, Player
     import database

@@ -6,7 +6,7 @@ import telebot
 
 from logic import database, db_setup
 from logic.db_setup import State, User, Player
-from logic.table import create_table
+from logic.table import create_total_table, create_round_table
 
 bot = telebot.TeleBot(os.environ.get("TELE_TOKEN"), threaded=False)
 
@@ -46,7 +46,8 @@ def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_
 
         endl = "\n"
         bot.send_message(chat_id,
-                         f"Результаты - {endl.join([i.name + ' ' + str(sum_of_point(i)) for i in players])}")
+                         # f"Результаты - {endl.join([i.name + ' ' + str(sum_of_point(i)) for i in players])}")
+                         "*Результаты*\n" + create_round_table(players, state.name), parse_mode='markdown')
         markup = telebot.types.InlineKeyboardMarkup()
 
         markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data=State(state.value + 1).name))
@@ -361,9 +362,9 @@ def positive_patchwork(message: telebot.types.Message):
             database.commit()
             bot.send_message(message.chat.id, "Игра окончена!")
             endl = "\n"
-            print(create_table(players))
+            print(create_total_table(players))
             bot.send_message(message.chat.id,
-                             create_table(players), parse_mode='markdown')
+                             create_total_table(players), parse_mode='markdown')
             database.del_players_by_creator(user.telegram_id)
 
         else:
