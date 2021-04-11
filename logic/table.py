@@ -6,7 +6,7 @@ def create_table(players):
 
     msg = "```\n"
     msg += '│ ' + ' │ '.join([i.name[:LEN_OF_NAME] for i in players]) + ' │ \n'
-    msg += '╞═' + '═╪═'.join(['═'*i for i in len_of_columns]) + '═╡\n'
+    msg += '\n'
 
     for state in database.points_for_3.keys():
         for i, l in zip(players, len_of_columns):
@@ -15,10 +15,10 @@ def create_table(players):
             msg += '│ ' + ' ' * first + str(num) + ' ' * (l - len(str(num)) - first) + ' '
         msg += '│\n'
 
-    msg += '╞═' + '═╧═'.join(['═' * i for i in len_of_columns]) + '═╡\n'
+    msg += '\n'
     width = sum([i + 2 for i in len_of_columns]) + len(len_of_columns) - 1
     msg += '│' + ' ' * ((width - 4) // 2) + "Итог" + ' ' * (width - 4 - (width - 4) // 2) + '│\n'
-    msg += '╞═' + '═╤═'.join(['═' * i for i in len_of_columns]) + '═╡\n'
+    msg += '\n'
 
     msg += '│ '
     for i, l in zip(players, len_of_columns):
