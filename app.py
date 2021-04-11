@@ -107,7 +107,7 @@ def register(message: telebot.types.Message):
 @bot.message_handler(commands=['start'])
 def register(message: telebot.types.Message):
     keyboard = telebot.types.ReplyKeyboardMarkup(True, True)
-    keyboard.row('3', '1')
+    keyboard.row('3', '4')
     bot.send_message(message.chat.id, text="Сколько человек будет играть?", reply_markup=keyboard)
     user = database.get_user(message.chat.id)
     if user:
@@ -151,7 +151,7 @@ def start_negative_bribes(call: telebot.types.CallbackQuery):
 # ====================== START ========================
 @bot.message_handler(func=state_of_user_is(State.start), content_types=['text'])
 def get_count_of_users(message: telebot.types.Message):
-    if message.text == "3" or message.text == "1":
+    if message.text == "3" or message.text == "4":
         user = database.get_user(message.chat.id)
         user.count_of_players = int(message.text)
         user.current_asking_player = 1
