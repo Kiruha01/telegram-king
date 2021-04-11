@@ -6,6 +6,7 @@ import telebot
 
 from logic import database, db_setup
 from logic.db_setup import State, User, Player
+from logic.table import create_table
 
 bot = telebot.TeleBot(os.environ.get("TELE_TOKEN"), threaded=False)
 
@@ -97,7 +98,7 @@ def register(message: telebot.types.Message):
 @bot.message_handler(commands=['to'])
 def register(message: telebot.types.Message):
     user = database.get_user(message.chat.id)
-    user.state = State.negative_king.value
+    user.state = State.positive_patchwork.value
     database.commit()
     bot.send_message(message.chat.id, text="Сколько?")
 
@@ -360,8 +361,9 @@ def positive_patchwork(message: telebot.types.Message):
             database.commit()
             bot.send_message(message.chat.id, "Игра окончена!")
             endl = "\n"
+            print(create_table(players))
             bot.send_message(message.chat.id,
-                             f"Результаты - {endl.join([i.name + ' ' + str(sum_of_point(i)) for i in players])}")
+                             create_table(players), parse_mode='markdown')
             database.del_players_by_creator(user.telegram_id)
 
         else:
