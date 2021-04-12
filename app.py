@@ -369,7 +369,8 @@ def positive_patchwork(message: telebot.types.Message):
 
         else:
             bot.send_message(message.chat.id,
-                             f"Сколько карт взял {players[user.current_asking_player - 1].name} по каждой из категорий?")
+                             f"Сколько карт взял *{players[user.current_asking_player - 1].name}* по каждой из категорий?",
+                             parse_mode='markdown')
     except ValueError:
         bot.send_message(message.chat.id, "Введи числа, пожалуйста.")
 
