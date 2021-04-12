@@ -87,12 +87,6 @@ def set_points_for_positive_patchwork(user, player: Player, chat_id, text):
         bot.send_message(chat_id, "Указаны не все раунды!\nОтправь количество взяток ещё раз.")
 
 
-@bot.message_handler(commands=['del_players'])
-def register(message: telebot.types.Message):
-    database.del_all_players()
-    bot.send_message(message.chat.id, text="Done")
-
-
 @bot.message_handler(commands=['to'])
 def register(message: telebot.types.Message):
     user = database.get_user(message.chat.id)

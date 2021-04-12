@@ -90,16 +90,6 @@ def get_players(creator_id):
         session.rollback()
 
 
-# TODO: Удалить после создания всех шагов бота
-def del_all_players():
-    try:
-        players = session.query(Player).all()
-        for i in players:
-            session.delete(i)
-        session.commit()
-    except PendingRollbackError:
-        session.rollback()
-
 
 def del_players_by_creator(creator):
     try:
