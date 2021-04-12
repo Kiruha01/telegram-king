@@ -9,6 +9,25 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 
+rounds = [
+    'negative_bribes',
+    'negative_hearts',
+    'negative_boys',
+    'negative_girls',
+    'negative_king',
+    'negative_last',
+    'negative_patchwork',
+
+    'positive_bribes',
+    'positive_hearts',
+    'positive_boys',
+    'positive_girls',
+    'positive_king',
+    'positive_last',
+    'positive_patchwork'
+]
+
+
 points_for_3 = {
     'negative_bribes': -2,
     'negative_hearts': -2,

@@ -8,7 +8,7 @@ def create_total_table(players):
     msg += '| ' + ' | '.join([i.name[:LEN_OF_NAME] for i in players]) + ' | \n'
     msg += '|=' + '=+='.join(['=' * i for i in len_of_columns]) + '=|\n'
 
-    for state in database.points_for_3.keys():
+    for state in database.rounds:
         for i, l in zip(players, len_of_columns):
             num = getattr(i, state)
             first = (l - len(str(num))) // 2
@@ -23,7 +23,7 @@ def create_total_table(players):
     msg += '| '
     for i, l in zip(players, len_of_columns):
         total = 0
-        for state in database.points_for_3.keys():
+        for state in database.rounds:
             total += getattr(i, state)
         first = (l - len(str(total))) // 2
         msg += ' ' * first + str(total) + ' ' * (l - len(str(total)) - first) + ' ' + '| '

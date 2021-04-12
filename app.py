@@ -31,18 +31,15 @@ def sum_of_point(user: User):
 
 
 def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_next_round, is_bribes=False):
+    dictonary = database.points_for_3 if user.count_of_players == 3 else database.points_for_4
     if user.current_asking_player < user.count_of_players:
-        setattr(players[user.current_asking_player - 1], state.name, count_of_cards * database.points_for_3[
-            state.name] if user.count_of_players == 3 else database.points_for_4[
-            state.name])
+        setattr(players[user.current_asking_player - 1], state.name, count_of_cards * dictonary[state.name])
 
         user.current_asking_player += 1
         bot.send_message(chat_id, f"Сколько {'взяток' if is_bribes else 'карт'} взял "
                                   f"*{players[user.current_asking_player - 1].name}*?", parse_mode='markdown')
     elif user.current_asking_player == user.count_of_players:
-        setattr(players[user.current_asking_player - 1], state.name, count_of_cards * (database.points_for_3[
-            state.name] if user.count_of_players == 3 else database.points_for_4[
-            state.name]))
+        setattr(players[user.current_asking_player - 1], state.name, count_of_cards * dictonary[state.name])
 
         endl = "\n"
         bot.send_message(chat_id,
@@ -363,7 +360,6 @@ def positive_patchwork(message: telebot.types.Message):
             user.current_asking_player += 1
             database.commit()
             bot.send_message(message.chat.id, "Игра окончена!")
-            print(create_total_table(players))
             bot.send_message(message.chat.id, create_total_table(players), parse_mode='markdown')
             database.del_players_by_creator(user.telegram_id)
 
