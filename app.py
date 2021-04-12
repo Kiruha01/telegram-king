@@ -48,6 +48,7 @@ def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_
         markup = telebot.types.InlineKeyboardMarkup()
 
         markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен', callback_data=State(state.value + 1).name))
+        markup.add(telebot.types.InlineKeyboardButton(text='Отменить', callback_data='undo'))
         bot.send_message(chat_id, name_of_next_round, reply_markup=markup)
         user.current_asking_player += 1
     database.commit()
@@ -114,7 +115,7 @@ def register(message: telebot.types.Message):
 
 
 # ======================= CALLS ======================
-@bot.callback_query_handler(func=lambda call: True)  # call.data == "negative_bribes")
+@bot.callback_query_handler(func=lambda call: call.data != 'undo')  # call.data == "negative_bribes")
 def start_negative_bribes(call: telebot.types.CallbackQuery):
     bot.edit_message_reply_markup(message_id=call.message.id, reply_markup=None, chat_id=call.message.chat.id)
     user = database.get_user(call.message.chat.id)
@@ -136,6 +137,16 @@ def start_negative_bribes(call: telebot.types.CallbackQuery):
                                                f"2 последние взятки```", parse_mode='markdown')
     else:
         bot.send_message(call.message.chat.id, f"Сколько карт взял *{player.name}*?", parse_mode='markdown')
+    database.commit()
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'undo')
+def start_negative_bribes(call: telebot.types.CallbackQuery):
+    bot.edit_message_text("Отменяем...", chat_id=call.message.chat.id, reply_markup=None, message_id=call.message.id)
+    user = database.get_user(call.message.chat.id)
+    player = database.get_players(user.telegram_id)[0]
+    user.current_asking_player = 1
+    bot.send_message(call.message.chat.id, f"Сколько карт взял *{player.name}*?", parse_mode='markdown')
     database.commit()
 
 
@@ -260,11 +271,15 @@ def negative_patchwork(message: telebot.types.Message):
         if user.current_asking_player == user.count_of_players + 1:
             user.current_asking_player += 1
             database.commit()
+            bot.send_message(message.chat.id, "*Результат*\n" + create_round_table(players, 'negative_patchwork'),
+                             parse_mode='markdown')
             bot.send_message(message.chat.id, "Переходим к положительным раундам!")
             markup = telebot.types.InlineKeyboardMarkup()
 
             markup.add(telebot.types.InlineKeyboardButton(text='Раунд закончен',
                                                           callback_data=State.positive_bribes.name))
+            markup.add(telebot.types.InlineKeyboardButton(text='Отменить',
+                                                          callback_data='undo'))
             bot.send_message(message.chat.id, "Раунд 1 - Брать взятки", reply_markup=markup)
 
         else:

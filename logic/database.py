@@ -60,6 +60,7 @@ points_for_4 = {
     'positive_last': 20
 }
 
+
 class get_user(object):
     def __new__(cls, telegram_id) -> User:
         if (hasattr(cls, 'user') and (cls.user is not None) and cls.user.telegram_id != telegram_id) or not hasattr(cls, 'user'):
@@ -75,6 +76,7 @@ def add(obj):
         session.add(obj)
     except PendingRollbackError:
         session.rollback()
+
 
 def commit():
     try:
