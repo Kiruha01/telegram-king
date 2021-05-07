@@ -57,7 +57,7 @@ def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_
 def set_points_for_negative_patchwork(user, player: Player, chat_id, text):
     points = text.split()
     if len(points) == db_setup.NUM_OF_ROUNDS:
-        dictionary = database.points_for_3 if user.current_asking_player == 3 else database.points_for_4
+        dictionary = database.points_for_3 if user.count_of_players == 3 else database.points_for_4
         bribes = int(points[0]) * dictionary['negative_bribes']
         hearts = int(points[1]) * dictionary['negative_hearts']
         boys = int(points[2]) * dictionary['negative_boys']
@@ -74,7 +74,7 @@ def set_points_for_negative_patchwork(user, player: Player, chat_id, text):
 def set_points_for_positive_patchwork(user, player: Player, chat_id, text):
     points = text.split()
     if len(points) == db_setup.NUM_OF_ROUNDS:
-        dictionary = database.points_for_3 if user.current_asking_player == 3 else database.points_for_4
+        dictionary = database.points_for_3 if user.count_of_players == 3 else database.points_for_4
         bribes = int(points[0]) * dictionary['positive_bribes']
         hearts = int(points[1]) * dictionary['positive_hearts']
         boys = int(points[2]) * dictionary['positive_boys']
