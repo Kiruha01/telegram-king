@@ -29,6 +29,22 @@ rounds = [
 
 
 points_for_3 = {
+    'negative_bribes': -4,
+    'negative_hearts': -5,
+    'negative_boys': -10,
+    'negative_girls': -10,
+    'negative_king': -40,
+    'negative_last': -20,
+
+    'positive_bribes': 4,
+    'positive_hearts': 5,
+    'positive_boys': 10,
+    'positive_girls': 10,
+    'positive_king': 40,
+    'positive_last': 20
+}
+
+points_for_4 = {
     'negative_bribes': -2,
     'negative_hearts': -2,
     'negative_boys': -4,
@@ -42,22 +58,6 @@ points_for_3 = {
     'positive_girls': 4,
     'positive_king': 16,
     'positive_last' : 8
-}
-
-points_for_4 = {
-    'negative_bribes': -4,
-    'negative_hearts': -4,
-    'negative_boys': -10,
-    'negative_girls': -10,
-    'negative_king': -40,
-    'negative_last': -20,
-
-    'positive_bribes': 4,
-    'positive_hearts': 4,
-    'positive_boys': 10,
-    'positive_girls': 10,
-    'positive_king': 40,
-    'positive_last': 20
 }
 
 
