@@ -57,7 +57,7 @@ def set_points_for_round(user, players, chat_id, count_of_cards, state, name_of_
 def set_points_for_negative_patchwork(user, player: Player, chat_id, text):
     points = text.split()
     if len(points) == db_setup.NUM_OF_ROUNDS:
-        dictionary = database.points_for_3 if user.count_of_players == 3 else database.points_for_4
+        dictionary = database.points_for_3 if user.count_of_players <= 3 else database.points_for_4
         bribes = int(points[0]) * dictionary['negative_bribes']
         hearts = int(points[1]) * dictionary['negative_hearts']
         boys = int(points[2]) * dictionary['negative_boys']
@@ -74,7 +74,7 @@ def set_points_for_negative_patchwork(user, player: Player, chat_id, text):
 def set_points_for_positive_patchwork(user, player: Player, chat_id, text):
     points = text.split()
     if len(points) == db_setup.NUM_OF_ROUNDS:
-        dictionary = database.points_for_3 if user.count_of_players == 3 else database.points_for_4
+        dictionary = database.points_for_3 if user.count_of_players <= 3 else database.points_for_4
         bribes = int(points[0]) * dictionary['positive_bribes']
         hearts = int(points[1]) * dictionary['positive_hearts']
         boys = int(points[2]) * dictionary['positive_boys']
@@ -99,7 +99,7 @@ def register(message: telebot.types.Message):
 @bot.message_handler(commands=['start'])
 def register(message: telebot.types.Message):
     keyboard = telebot.types.ReplyKeyboardMarkup(True, True)
-    keyboard.row('3', '4')
+    keyboard.row('2', '3', '4')
     bot.send_message(message.chat.id, text="Сколько человек будет играть?", reply_markup=keyboard)
     user = database.get_user(message.chat.id)
     if user:
@@ -153,7 +153,13 @@ def start_negative_bribes(call: telebot.types.CallbackQuery):
 # ====================== START ========================
 @bot.message_handler(func=state_of_user_is(State.start), content_types=['text'])
 def get_count_of_users(message: telebot.types.Message):
-    if message.text == "3" or message.text == "4":
+    if message.text == "3" or message.text == "4" or message.text == "2":
+
+        if message.text == "3":
+            bot.send_message(message.chat.id, text="Уберите *чёрные семёрки*", parse_mode='markdown')
+        elif message.text == "2":
+            bot.send_message(message.chat.id, text="Оставьте карты с *валета* до *туза*", parse_mode='markdown')
+
         user = database.get_user(message.chat.id)
         user.count_of_players = int(message.text)
         user.current_asking_player = 1
