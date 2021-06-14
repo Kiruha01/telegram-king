@@ -5,7 +5,7 @@ import git
 import telebot
 
 from logic import database, db_setup, config
-from logic.db_setup import State, User, Player
+from logic.config import State
 from logic.table import create_total_table, create_round_table
 
 bot = telebot.TeleBot(os.environ.get("TELE_TOKEN"), threaded=False)

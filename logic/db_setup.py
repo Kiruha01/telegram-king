@@ -1,6 +1,5 @@
 import os
 from logic.config import rounds
-from enum import Enum
 import sqlite3
 from sqlite3 import Warning
 
@@ -35,33 +34,6 @@ class SQLiteManager:
                   count_of_players INTEGER NOT NULL,
                   current_asking_player INTEGER NOT NULL DEFAULT 0
                 );""")
-
-
-
-NUM_OF_ROUNDS = 6
-
-
-class State(Enum):
-    start = 0
-    names = 1
-
-    negative_bribes = 2
-    negative_hearts = 3
-    negative_boys = 4
-    negative_girls = 5
-    negative_king = 6
-    negative_last = 7
-    negative_patchwork = 8
-
-    positive_bribes = 9
-    positive_hearts = 10
-    positive_boys = 11
-    positive_girls = 12
-    positive_king = 13
-    positive_last = 14
-    positive_patchwork = 15
-
-    final = 16
 
 # env:
 #     db_manager: sqlite
