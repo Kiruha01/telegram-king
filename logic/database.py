@@ -1,51 +1,45 @@
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import PendingRollbackError
-
-from logic.db_setup import Player, User, Base, engine
-
-Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-
-session = DBSession()
+from logic.db_setup import get_manager_builder
+from logic.config import State
+import os
 
 
-class get_user(object):
-    def __new__(cls, telegram_id) -> User:
-        if (hasattr(cls, 'user') and (cls.user is not None) and cls.user.telegram_id != telegram_id) or not hasattr(cls, 'user'):
-            try:
-                cls.user = session.query(User).filter_by(telegram_id=telegram_id).first()
-            except PendingRollbackError:
-                session.rollback()
-        return cls.user
+def get_manager():
+    manager_name = os.environ.get('db_manager')
+    if manager_name is None:
+        raise Exception('DB Manager does not set.')
+    manager = get_manager_builder(manager_name)(
+        host=os.environ.get('db_host'),
+        database=os.environ.get('db_name'),
+        user=os.environ.get('db_user'),
+        password=os.environ.get('db_password'),
+        port=os.environ.get('db_port'),
+    )
+    manager.create_users_table()
+    return manager
 
 
-def add(obj):
-    try:
-        session.add(obj)
-    except PendingRollbackError:
-        session.rollback()
+class User:
+    def __init__(self, id: int, telegram_id: str, count_of_layers: int):
+        self.id: int = id
+        self.telegram_id: str = telegram_id
+        self.state: State = State.start
+        self.count_of_players: int = count_of_layers
+        self.current_asking_player: int = 0
 
 
-def commit():
-    try:
-        session.commit()
-    except PendingRollbackError:
-        session.rollback()
+class Controller:
+    def __init__(self):
+        self.manager = get_manager()
+        self.user: User = User(0, "0", 0)
 
-
-def get_players(creator_id):
-    try:
-        return session.query(Player).filter_by(creator=creator_id)
-    except PendingRollbackError:
-        session.rollback()
-
-
-
-def del_players_by_creator(creator):
-    try:
-        players = session.query(Player).filter_by(creator=creator)
-        for i in players:
-            session.delete(i)
-        session.commit()
-    except PendingRollbackError:
-        session.rollback()
+    def get_user(self, telegram_id: str):
+        if self.user is None or self.user.telegram_id != telegram_id:
+            user = self.manager.execute("SELECT "
+                                            "(id, state, count_of_players, current_asking_player) "
+                                        "FROM Users WHERE telegram_id = %s;" % telegram_id)[0]
+            self.user.id = user[0]
+            self.user.telegram_id = telegram_id
+            self.user.state = State(user[1])
+            self.user.count_of_players = user[2]
+            self.user.current_asking_player = user[3]
+        return self.user

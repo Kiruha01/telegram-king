@@ -29,7 +29,7 @@ class SQLiteManager:
     def create_users_table(self):
         self.execute(f"""CREATE TABLE IF NOT EXISTS Users (
                   id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  telegram_id TEXT NOT NULL,
+                  telegram_id TEXT NOT NULL UNIQUE,
                   state INTEGER NOT NULL DEFAULT 0,
                   count_of_players INTEGER NOT NULL,
                   current_asking_player INTEGER NOT NULL DEFAULT 0
@@ -49,18 +49,3 @@ def get_manager_builder(name):
         return SQLiteManager
     else:
         raise Exception("Manager does not exist.")
-
-
-def get_manager():
-    manager_name = os.environ.get('db_manager')
-    if manager_name is None:
-        raise Exception('DB Manager does not set.')
-    manager = get_manager_builder(manager_name)(
-        host=os.environ.get('db_host'),
-        database=os.environ.get('db_name'),
-        user=os.environ.get('db_user'),
-        password=os.environ.get('db_password'),
-        port=os.environ.get('db_port'),
-    )
-    manager.create_users_table()
-    return manager
