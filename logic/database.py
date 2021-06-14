@@ -55,7 +55,10 @@ class Controller:
 
     def create_user(self, telegram_id, count_of_players):
         self.manager.execute("INSERT INTO Users (telegram_id, count_of_players) VALUES ('%s', %s);" % (telegram_id, count_of_players))
+        id = self.manager.execute("SELECT id FROM Users WHERE telegram_id = %s;" % telegram_id)[0][0]
+        user = User(id, telegram_id, count_of_players)
         self.manager.create_players_table(telegram_id)
+        return user
 
     def get_user(self, telegram_id: str):
         if self.user is None or self.user.telegram_id != telegram_id:

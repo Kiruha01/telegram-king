@@ -1,4 +1,4 @@
-from logic.database import Player, User, Controller, State
+from logic.database import User, Controller, State
 from logic.db_setup import SQLiteManager
 
 
@@ -9,14 +9,15 @@ def test_controller(controller):
 def test_createUser(controller: Controller, empty_database: SQLiteManager, user: User):
     controller.create_user(user.telegram_id, user.count_of_players)
     assert empty_database.execute("SELECT * FROM Users;") == [(user.id, user.telegram_id, user.state.value,
-                                                               user.count_of_players, user.current_asking_player),]
+                                                               user.count_of_players, user.current_asking_player), ]
     assert empty_database.execute(f"SELECT * FROM _{user.telegram_id};") == []
 
 
 def test_createPlayer(controller: Controller, empty_database: SQLiteManager, user: User):
     controller.create_user(user.telegram_id, user.count_of_players)
     controller.create_player(user, 'Ivan')
-    assert empty_database.execute(f"SELECT * FROM _{user.telegram_id};") == [(1, 'Ivan', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
+    assert empty_database.execute(f"SELECT * FROM _{user.telegram_id};") == [
+        (1, 'Ivan', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)]
 
 
 def test_setPointsToUsers(controller_with_two_players: Controller, empty_database: SQLiteManager, user: User):
@@ -31,14 +32,14 @@ def test_getPlayerById(controller_with_two_players: Controller, user: User):
     controller_with_two_players.create_user(user2.telegram_id, user2.count_of_players)
     controller_with_two_players.create_player(user2, "Olga")
     assert controller_with_two_players.get_ids_players(user) == [1, 2]
-    assert controller_with_two_players.get_ids_players(user2) == [1,]
+    assert controller_with_two_players.get_ids_players(user2) == [1, ]
 
 
 def test_getUserById(controller_with_two_players: Controller, user: User):
     player = controller_with_two_players.get_player_by_id(user, 1)
     assert player.name == "Ivan" and \
-        player.negative_bribes == -42 and \
-        player.negative_patchwork == -420
+           player.negative_bribes == -42 and \
+           player.negative_patchwork == -420
 
 
 def test_optimize_getUser(controller_with_two_players: Controller, user: User):

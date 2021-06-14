@@ -49,6 +49,7 @@ def controller_with_two_players(controller, user):
 def user():
     return User(1, '123', 4)
 
+
 @pytest.fixture(scope="function", autouse=True)
 def setup(request):
     try:
