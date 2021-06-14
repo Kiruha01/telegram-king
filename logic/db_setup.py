@@ -1,37 +1,35 @@
 import os
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
+from logic.config import rounds
 from enum import Enum
+import sqlite3
+from sqlite3 import Warning
 
-Base = declarative_base()
 
+class SQLiteManager:
+    def __init__(self, host, *args, **kwargs):
+        self.core = "sqlite"
+        self.connection = sqlite3.connect(host)
 
-class Player(Base):
-    __tablename__ = 'Player'
+    def execute(self, query, params=None):
+        cursor = self.connection.cursor()
+        try:
+            r = cursor.execute(query)
+        except Warning:
+            r = cursor.executescript(query)
+        self.connection.commit()
+        print("Query executed successfully")
+        return r.fetchall()
+        # except Error as e:
+        #     raise Error
+        #     print(f"The error '{e}' occurred")
 
-    id = Column(Integer, primary_key=True)
-    creator = Column(Integer, nullable=False)
-    name = Column(String(127), nullable=False)
+    def create_table(self, name):
+        self.execute(f"""CREATE TABLE IF NOT EXISTS _{name} (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          {", ".join(map(lambda x: x + " INTEGER DEFAULT 0", rounds)) }
+        );""")
 
-    negative_bribes = Column(Integer, nullable=False, default=0)
-    negative_hearts = Column(Integer, nullable=False, default=0)
-    negative_boys = Column(Integer, nullable=False, default=0)
-    negative_girls = Column(Integer, nullable=False, default=0)
-    negative_king = Column(Integer, nullable=False, default=0)
-    negative_last = Column(Integer, nullable=False, default=0)
-    negative_patchwork = Column(Integer, nullable=False, default=0)
-
-    positive_bribes = Column(Integer, nullable=False, default=0)
-    positive_hearts = Column(Integer, nullable=False, default=0)
-    positive_boys = Column(Integer, nullable=False, default=0)
-    positive_girls = Column(Integer, nullable=False, default=0)
-    positive_king = Column(Integer, nullable=False, default=0)
-    positive_last = Column(Integer, nullable=False, default=0)
-    positive_patchwork = Column(Integer, nullable=False, default=0)
-
-    def __str__(self):
-        return self.name
 
 
 NUM_OF_ROUNDS = 6
@@ -60,22 +58,22 @@ class State(Enum):
     final = 16
 
 
-class User(Base):
-    __tablename__ = 'User'
-
-    id = Column(Integer, primary_key=True)
-    telegram_id = Column(Integer, nullable=False)
-    state = Column(Integer, nullable=False)
-    count_of_players = Column(Integer, nullable=False)  # число игроков, играющих в игру
-    current_asking_player = Column(Integer, nullable=False)  # Текущий игрок, у которого спрашивают количество взяток
-
-    def set_state(self, state):
-        self.state = state.value
-
-
-if os.environ.get("DEPLOY"):
-    engine = create_engine(
-        f'mysql+mysqldb://kinggame:{os.environ.get("DBPASS")}@kinggame.mysql.pythonanywhere-services.com/kinggame$game?charset=utf8')
-else:
-    engine = create_engine('sqlite:///db.sqlite')
-Base.metadata.create_all(engine)
+# class User(Base):
+#     __tablename__ = 'User'
+#
+#     id = Column(Integer, primary_key=True)
+#     telegram_id = Column(Integer, nullable=False)
+#     state = Column(Integer, nullable=False)
+#     count_of_players = Column(Integer, nullable=False)  # число игроков, играющих в игру
+#     current_asking_player = Column(Integer, nullable=False)  # Текущий игрок, у которого спрашивают количество взяток
+#
+#     def set_state(self, state):
+#         self.state = state.value
+#
+#
+# if os.environ.get("DEPLOY"):
+#     engine = create_engine(
+#         f'mysql+mysqldb://kinggame:{os.environ.get("DBPASS")}@kinggame.mysql.pythonanywhere-services.com/kinggame$game?charset=utf8')
+# else:
+#     engine = create_engine('sqlite:///db.sqlite')
+# Base.metadata.create_all(engine)
