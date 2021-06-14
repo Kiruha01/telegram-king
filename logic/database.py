@@ -27,6 +27,26 @@ class User:
         self.current_asking_player: int = 0
 
 
+class Player:
+    def __init__(self, id, name, nb, nh, nbs, ngs, nk, nl, np, pb, ph, pbs, pgs, pk, pl, pp):
+        self.id = id
+        self.name = name
+        self.negative_bribes = nb
+        self.negative_hearts = nh
+        self.negative_boys = nbs
+        self.negative_girls = ngs
+        self.negative_king = nk
+        self.negative_last = nl
+        self.negative_patchwork = np
+
+        self.positive_bribes = pb
+        self.positive_hearts = ph
+        self.positive_boys = pbs
+        self.positive_girls = pgs
+        self.positive_king = pk
+        self.positive_last = pl
+        self.positive_patchwork = pp
+
 class Controller:
     def __init__(self):
         self.manager = get_manager()
@@ -48,5 +68,19 @@ class Controller:
         self.manager.execute("INSERT INTO Users (telegram_id, count_of_players) VALUES (%s, %s);" % (telegram_id, count_of_players))
         self.manager.create_players_table(telegram_id)
 
-    def create_player(self, user: User,  name):
+    def create_player(self, user: User, name):
         self.manager.execute("INSERT INTO _%s (name) VALUES (%s);" % (user.telegram_id, name))
+
+    def set_points(self, user: User, id: int, field: str, points: int):
+        self.manager.execute(f"UPDATE _{user.telegram_id} SET {field} = {points} WHERE id = {id};")
+
+    def get_ids_players(self, user: User):
+        raw = self.manager.execute(f"SELECT id FROM _{user.telegram_id};")
+        players = []
+        for i in raw:
+            players.append(i[0])
+        return players
+
+    def get_player_by_id(self, user: User, id: int) -> Player:
+        raw = self.manager.execute(f"SELECT * FROM _{user} WHERE id = {id}")[0]
+        return Player(*raw)
