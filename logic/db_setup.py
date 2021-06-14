@@ -19,16 +19,22 @@ class SQLiteManager:
         self.connection.commit()
         print("Query executed successfully")
         return r.fetchall()
-        # except Error as e:
-        #     raise Error
-        #     print(f"The error '{e}' occurred")
 
-    def create_table(self, name):
-        self.execute(f"""CREATE TABLE IF NOT EXISTS _{name} (
+    def create_players_table(self, name):
+        self.execute(f"""CREATE TABLE IF NOT EXISTS {name} (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
           {", ".join(map(lambda x: x + " INTEGER DEFAULT 0", rounds)) }
         );""")
+
+    def create_users_table(self):
+        self.execute(f"""CREATE TABLE IF NOT EXISTS Users (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  telegram_id TEXT NOT NULL,
+                  state INTEGER NOT NULL DEFAULT 0,
+                  count_of_players INTEGER NOT NULL,
+                  current_asking_player INTEGER NOT NULL DEFAULT 0
+                );""")
 
 
 
@@ -57,23 +63,32 @@ class State(Enum):
 
     final = 16
 
+# env:
+#     db_manager: sqlite
+#     db_host: db.sqlite
+#     db_port: 232
+#     db_name: tutor
+#     db_user: user
+#     db_password: ssfdsgrf
 
-# class User(Base):
-#     __tablename__ = 'User'
-#
-#     id = Column(Integer, primary_key=True)
-#     telegram_id = Column(Integer, nullable=False)
-#     state = Column(Integer, nullable=False)
-#     count_of_players = Column(Integer, nullable=False)  # число игроков, играющих в игру
-#     current_asking_player = Column(Integer, nullable=False)  # Текущий игрок, у которого спрашивают количество взяток
-#
-#     def set_state(self, state):
-#         self.state = state.value
-#
-#
-# if os.environ.get("DEPLOY"):
-#     engine = create_engine(
-#         f'mysql+mysqldb://kinggame:{os.environ.get("DBPASS")}@kinggame.mysql.pythonanywhere-services.com/kinggame$game?charset=utf8')
-# else:
-#     engine = create_engine('sqlite:///db.sqlite')
-# Base.metadata.create_all(engine)
+
+def get_manager_builder(name):
+    if name == 'sqlite':
+        return SQLiteManager
+    else:
+        raise Exception("Manager does not exist.")
+
+
+def get_manager():
+    manager_name = os.environ.get('db_manager')
+    if manager_name is None:
+        raise Exception('DB Manager does not set.')
+    manager = get_manager_builder(manager_name)(
+        host=os.environ.get('db_host'),
+        database=os.environ.get('db_name'),
+        user=os.environ.get('db_user'),
+        password=os.environ.get('db_password'),
+        port=os.environ.get('db_port'),
+    )
+    manager.create_users_table()
+    return manager

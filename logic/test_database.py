@@ -6,7 +6,7 @@ import logic.db_setup as db
 @pytest.fixture(params=[db.SQLiteManager, ])
 def empty_database(request):
     c = request.param('temp.sqlite')
-    c.create_table("test")
+    c.create_players_table("test")
     return c
 
 
@@ -21,6 +21,7 @@ def fulfill_database(empty_database):
 
     return c
 
+
 def setup():
     try:
         open('temp.sqlite', 'x')
@@ -34,8 +35,6 @@ def teardown():
 
 def test_createTable(empty_database):
     pass
-    # c = db.SQLiteManager('temp.sqlite')
-    # c.create_table("test")
 
 
 def test_insert(empty_database):
