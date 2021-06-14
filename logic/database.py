@@ -53,10 +53,14 @@ class Controller:
         self.manager = get_manager()
         self.user: User = User(0, "0", 0)
 
+    def create_user(self, telegram_id, count_of_players):
+        self.manager.execute("INSERT INTO Users (telegram_id, count_of_players) VALUES ('%s', %s);" % (telegram_id, count_of_players))
+        self.manager.create_players_table(telegram_id)
+
     def get_user(self, telegram_id: str):
         if self.user is None or self.user.telegram_id != telegram_id:
             user = self.manager.execute("SELECT "
-                                            "(id, state, count_of_players, current_asking_player) "
+                                        "id, state, count_of_players, current_asking_player "
                                         "FROM Users WHERE telegram_id = %s;" % telegram_id)[0]
             self.user.id = user[0]
             self.user.telegram_id = telegram_id
@@ -65,9 +69,9 @@ class Controller:
             self.user.current_asking_player = user[3]
         return self.user
 
-    def create_user(self, telegram_id, count_of_players):
-        self.manager.execute("INSERT INTO Users (telegram_id, count_of_players) VALUES ('%s', %s);" % (telegram_id, count_of_players))
-        self.manager.create_players_table(telegram_id)
+    def update_user(self, user: User):
+        self.manager.execute(f"UPDATE Users SET 'state' = {user.state.value}, "
+                             f"current_asking_player = {user.current_asking_player} WHERE id = {user.id}")
 
     def create_player(self, user: User, name):
         self.manager.execute("INSERT INTO _%s (name) VALUES ('%s');" % (user.telegram_id, name))

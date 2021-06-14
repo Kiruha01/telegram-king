@@ -39,15 +39,10 @@ def controller_with_two_players(controller, user):
     controller.create_user(user.telegram_id, user.count_of_players)
     controller.create_player(user, 'Ivan')
     controller.create_player(user, 'Vasya')
+    controller.set_points(user, 1, 'negative_bribes', -42)
+    controller.set_points(user, 1, 'negative_patchwork', -420)
+    controller.set_points(user, 2, 'positive_bribes', 50)
     return controller
-
-
-@pytest.fixture()
-def controller_with_two_players2(user, controller_with_two_players):
-    controller_with_two_players.set_points(user, 1, 'negative_bribes', -42)
-    controller_with_two_players.set_points(user, 1, 'negative_patchwork', -420)
-    controller_with_two_players.set_points(user, 2, 'positive_bribes', 50)
-    return controller_with_two_players
 
 
 @pytest.fixture()
