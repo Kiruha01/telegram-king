@@ -19,11 +19,11 @@ def get_manager():
 
 
 class User:
-    def __init__(self, id: int, telegram_id: str, count_of_layers: int):
+    def __init__(self, id: int, telegram_id: str, count_of_players: int):
         self.id: int = id
         self.telegram_id: str = telegram_id
         self.state: State = State.start
-        self.count_of_players: int = count_of_layers
+        self.count_of_players: int = count_of_players
         self.current_asking_player: int = 0
 
 
@@ -43,3 +43,10 @@ class Controller:
             self.user.count_of_players = user[2]
             self.user.current_asking_player = user[3]
         return self.user
+
+    def create_user(self, telegram_id, count_of_players):
+        self.manager.execute("INSERT INTO Users (telegram_id, count_of_players) VALUES (%s, %s);" % (telegram_id, count_of_players))
+        self.manager.create_players_table(telegram_id)
+
+    def create_player(self, user: User,  name):
+        self.manager.execute("INSERT INTO _%s (name) VALUES (%s);" % (user.telegram_id, name))

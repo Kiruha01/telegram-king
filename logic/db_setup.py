@@ -20,7 +20,7 @@ class SQLiteManager:
         return r.fetchall()
 
     def create_players_table(self, name):
-        self.execute(f"""CREATE TABLE IF NOT EXISTS {name} (
+        self.execute(f"""CREATE TABLE IF NOT EXISTS _{name} (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
           {", ".join(map(lambda x: x + " INTEGER DEFAULT 0", rounds)) }
