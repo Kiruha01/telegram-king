@@ -1,4 +1,4 @@
-from logic import database
+from logic import config
 
 def create_total_table(players):
     LEN_OF_NAME = 5
@@ -8,7 +8,7 @@ def create_total_table(players):
     msg += '| ' + ' | '.join([i.name[:LEN_OF_NAME] for i in players]) + ' | \n'
     msg += '|=' + '=+='.join(['=' * i for i in len_of_columns]) + '=|\n'
 
-    for state in database.rounds:
+    for state in config.rounds:
         for i, l in zip(players, len_of_columns):
             num = getattr(i, state)
             first = (l - len(str(num))) // 2
