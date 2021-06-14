@@ -47,6 +47,7 @@ class Player:
         self.positive_last = pl
         self.positive_patchwork = pp
 
+
 class Controller:
     def __init__(self):
         self.manager = get_manager()
@@ -65,11 +66,11 @@ class Controller:
         return self.user
 
     def create_user(self, telegram_id, count_of_players):
-        self.manager.execute("INSERT INTO Users (telegram_id, count_of_players) VALUES (%s, %s);" % (telegram_id, count_of_players))
+        self.manager.execute("INSERT INTO Users (telegram_id, count_of_players) VALUES ('%s', %s);" % (telegram_id, count_of_players))
         self.manager.create_players_table(telegram_id)
 
     def create_player(self, user: User, name):
-        self.manager.execute("INSERT INTO _%s (name) VALUES (%s);" % (user.telegram_id, name))
+        self.manager.execute("INSERT INTO _%s (name) VALUES ('%s');" % (user.telegram_id, name))
 
     def set_points(self, user: User, id: int, field: str, points: int):
         self.manager.execute(f"UPDATE _{user.telegram_id} SET {field} = {points} WHERE id = {id};")
@@ -82,5 +83,5 @@ class Controller:
         return players
 
     def get_player_by_id(self, user: User, id: int) -> Player:
-        raw = self.manager.execute(f"SELECT * FROM _{user} WHERE id = {id}")[0]
+        raw = self.manager.execute(f"SELECT * FROM _{user.telegram_id} WHERE id = {id}")[0]
         return Player(*raw)

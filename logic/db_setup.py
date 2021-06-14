@@ -16,7 +16,6 @@ class SQLiteManager:
         except Warning:
             r = cursor.executescript(query)
         self.connection.commit()
-        print("Query executed successfully")
         return r.fetchall()
 
     def create_players_table(self, name):
