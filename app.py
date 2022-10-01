@@ -4,6 +4,7 @@ from flask import Flask, request
 import git
 import telebot
 
+import strings
 from logic import database, db_setup
 from logic.db_setup import State, User, Player
 from logic.table import create_total_table, create_round_table
@@ -98,6 +99,7 @@ def register(message: telebot.types.Message):
 
 @bot.message_handler(commands=['start'])
 def register(message: telebot.types.Message):
+    bot.send_message(message.chat.id, text=strings.RULES, parse_mode="markdown")
     keyboard = telebot.types.ReplyKeyboardMarkup(True, True)
     keyboard.row('2', '3', '4')
     bot.send_message(message.chat.id, text="Сколько человек будет играть?", reply_markup=keyboard)
